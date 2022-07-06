@@ -46,7 +46,7 @@ namespace BF2TV.Backend.Functions.Controllers
             Description = "The OK response")]
 
         public async Task<IActionResult> Messages(
-            [HttpTrigger(AuthorizationLevel.Function, "get", Route = $"{nameof(Discord)}/{nameof(Messages)}")]
+            [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = $"{nameof(Discord)}/{nameof(Messages)}")]
             HttpRequest req)
         {
             _logger.LogInformation("Azure Function entry point of {Method} was triggered", nameof(Messages));
