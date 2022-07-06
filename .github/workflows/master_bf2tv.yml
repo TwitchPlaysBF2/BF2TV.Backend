@@ -32,7 +32,7 @@ jobs:
         shell: bash
         run: |
           pushd './'
-          dotnet build --configuration Release --output ./output
+          dotnet build --configuration Release --output output
           popd
 
       - name: 'Run Azure Functions Action'
@@ -41,5 +41,5 @@ jobs:
         with:
           app-name: 'bf2tv'
           slot-name: 'Production'
-          package: './src/BF2TV.Backend.Functions/'
+          package: './src/output'
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_4C07B89116DE4ED99EF8AD9D0C966FAF }}
