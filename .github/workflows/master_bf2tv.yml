@@ -31,7 +31,7 @@ jobs:
       - name: 'Resolve Project Dependencies Using Dotnet'
         shell: bash
         run: |
-          pushd './src/${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}'
+          pushd './'
           dotnet build --configuration Release --output ./output
           popd
 
@@ -41,5 +41,5 @@ jobs:
         with:
           app-name: 'bf2tv'
           slot-name: 'Production'
-          package: '${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}/output'
+          package: './output'
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_4C07B89116DE4ED99EF8AD9D0C966FAF }}
