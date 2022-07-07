@@ -1,15 +1,16 @@
-using System.IO;
+using System;
+using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
+using BF2TV.Backend.Functions.DiscordApi;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Azure.WebJobs.Extensions.OpenApi.Core.Attributes;
-using Microsoft.Azure.WebJobs.Extensions.OpenApi.Core.Enums;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using Microsoft.OpenApi.Models;
-using Newtonsoft.Json;
+using Refit;
 
 namespace BF2TV.Backend.Functions.Controllers
 {
@@ -23,45 +24,32 @@ namespace BF2TV.Backend.Functions.Controllers
         }
 
         [FunctionName(nameof(Messages))]
-
-        [OpenApiOperation(operationId: "Run", tags: new[] { "name" })]
-
-        [OpenApiSecurity(
-            "function_key",
-            SecuritySchemeType.ApiKey,
-            Name = "code",
-            In = OpenApiSecurityLocationType.Query)]
-
-        [OpenApiParameter(
-            name: "name",
-            In = ParameterLocation.Query,
-            Required = true,
-            Type = typeof(string),
-            Description = "The **Name** parameter")]
-
+        [OpenApiOperation(operationId: "Run")]
         [OpenApiResponseWithBody(
             statusCode: HttpStatusCode.OK,
             contentType: "text/plain",
-            bodyType: typeof(string),
-            Description = "The OK response")]
-
+            bodyType: typeof(string))]
         public async Task<IActionResult> Messages(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = $"{nameof(Discord)}/{nameof(Messages)}")]
+            [HttpTrigger(AuthorizationLevel.Function, "get", Route = $"{nameof(Discord)}/{nameof(Messages)}")]
             HttpRequest req)
         {
             _logger.LogInformation("Azure Function entry point of {Method} was triggered", nameof(Messages));
 
-            string name = req.Query["name"];
+            var config = new ConfigurationBuilder()
+                .AddEnvironmentVariables()
+                .Build();
 
-            var requestBody = await new StreamReader(req.Body).ReadToEndAsync();
-            dynamic data = JsonConvert.DeserializeObject(requestBody);
-            name = name ?? data?.name;
+            var token = config["DiscordAuth"];
+            if (token == null)
+                throw new ArgumentException("Couldn't resolve secret");
 
-            var responseMessage = string.IsNullOrEmpty(name)
-                ? "Missing query parameter `name`."
-                : $"Hello, {name}.";
+            var channelId = "991744806462160896";
+            var authenticationPhrase = $"Bot {token}";
 
-            return new OkObjectResult(responseMessage);
+            var discordApi = RestService.For<IDiscordApi>("https://discord.com/api/v10");
+            var messages = await discordApi.GetMessagesForChannelId(channelId, authenticationPhrase);
+
+            return new OkObjectResult(messages);
         }
     }
 }
