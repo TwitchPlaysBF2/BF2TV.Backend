@@ -41,7 +41,7 @@ namespace BF2TV.Backend.Functions.Controllers
 
             var token = config["DiscordAuth"];
             if (token == null)
-                throw new ArgumentException("Couldn't resolve secret");
+                return new OkObjectResult("Couldn't resolve secret");
 
             var channelId = "991744806462160896";
             var authenticationPhrase = $"Bot {token}";
