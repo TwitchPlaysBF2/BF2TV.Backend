@@ -43,7 +43,8 @@ namespace BF2TV.Backend.Functions.Controllers
             if (token == null)
                 return new OkObjectResult("Couldn't resolve secret");
 
-            var channelId = "991762861967822920";
+            var channelId = "991744806462160896"; // actual chat channel
+            // var channelId = "991762861967822920"; // test channel
             var authenticationPhrase = $"Bot {token}";
 
             var discordApi = RestService.For<IDiscordApi>("https://discord.com/api/v10");
